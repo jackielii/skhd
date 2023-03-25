@@ -55,7 +55,7 @@ extern CGError CGSRegisterNotifyProc(void *handler, uint32_t type, void *context
 
 global unsigned major_version = 0;
 global unsigned minor_version = 3;
-global unsigned patch_version = 5;
+global unsigned patch_version = 6;
 
 global struct carbon_event carbon;
 global struct event_tap event_tap;
