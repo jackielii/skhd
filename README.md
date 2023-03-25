@@ -1,3 +1,15 @@
+# My fork of skhd
+
+To install:
+
+```
+brew install jackielii/tap/skhd
+```
+
+- [x] Add key forwarding mode (no-remap). See below for usage details
+
+----
+
 [![Build Status](https://travis-ci.org/koekeishiya/skhd.svg?branch=master)](https://travis-ci.org/koekeishiya/skhd)
 
 **skhd** is a simple hotkey daemon for macOS that focuses on responsiveness and performance.
