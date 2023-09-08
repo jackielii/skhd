@@ -28,6 +28,7 @@
 #include "hotkey.h"
 #include "synthesize.h"
 #include "service.h"
+#include "help.h"
 
 #include "hotload.c"
 #include "event_tap.c"
@@ -53,6 +54,7 @@ extern CGError CGSRegisterNotifyProc(void *handler, uint32_t type, void *context
 
 #define VERSION_OPT_LONG        "--version"
 #define VERSION_OPT_SHRT        "-v"
+#define HELP_OPT                "--help"
 
 #define SERVICE_INSTALL_OPT     "--install-service"
 #define SERVICE_UNINSTALL_OPT   "--uninstall-service"
@@ -277,6 +279,11 @@ static inline bool string_equals(const char *a, const char *b)
 
 static bool parse_arguments(int argc, char **argv)
 {
+    if (string_equals(argv[1], HELP_OPT)) {
+        fprintf(stdout, HELP_USAGE);
+        exit(EXIT_SUCCESS);
+    }
+
     if ((string_equals(argv[1], VERSION_OPT_LONG)) ||
         (string_equals(argv[1], VERSION_OPT_SHRT))) {
         fprintf(stdout, "skhd-v%d.%d.%d\n", MAJOR, MINOR, PATCH);
