@@ -1,3 +1,18 @@
+My fork of koekeishiya/skhd.
+
+This fork adds key forwarding. See [#254](https://github.com/koekeishiya/skhd/pull/254) for details
+
+To install:
+
+```
+brew install jackielii/tap/skhd
+skhd --start-service
+```
+
+
+**Original Readme**
+----
+
 **skhd** is a simple hotkey daemon for macOS that focuses on responsiveness and performance.
 Hotkeys are defined in a text file through a simple DSL. **skhd** is able to hotload its config file, meaning that hotkeys can be edited and updated live while **skhd** is running.
 
