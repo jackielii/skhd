@@ -112,5 +112,6 @@ void free_mode_map(struct table *mode_map);
 void free_blacklist(struct table *blacklst);
 
 void init_shell(void);
+void set_shell(char* shell);
 
 #endif

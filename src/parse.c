@@ -449,6 +449,14 @@ void parse_option_load(struct parser *parser, struct token option)
     }));
 }
 
+void parse_option_shell(struct parser *parser, struct token option)
+{
+    struct token filename_token = parser_previous(parser);
+    char *filename = copy_string_count(filename_token.text, filename_token.length);
+    debug("\tsetting shell to %s\n", filename);
+    set_shell(filename);
+}
+
 void parse_option(struct parser *parser)
 {
     parser_match(parser, Token_Option);
@@ -468,6 +476,14 @@ void parse_option(struct parser *parser)
             debug("}\n");
         } else {
             parser_report_error(parser, option, "expected filename\n");
+        }
+    } else if (token_equals(option, "SHELL")) {
+        if (parser_match(parser, Token_String)) {
+            debug("SHELL :: #%d {\n", option.line);
+            parse_option_shell(parser, option);
+            debug("}\n");
+        } else {
+            parser_report_error(parser, option, "expected shell\n");
         }
     } else {
         parser_report_error(parser, option, "invalid option specified\n");

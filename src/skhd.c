@@ -510,7 +510,6 @@ int main(int argc, char **argv)
     signal(SIGCHLD, SIG_IGN);
     signal(SIGUSR1, sigusr1_handler);
 
-    init_shell();
     table_init(&mode_map, 13, (table_hash_func) hash_string, (table_compare_func) compare_string);
     table_init(&blacklst, 13, (table_hash_func) hash_string, (table_compare_func) compare_string);
     END_SCOPED_TIMED_BLOCK();
@@ -519,6 +518,8 @@ int main(int argc, char **argv)
     debug("skhd: using config '%s'\n", config_file);
     parse_config_helper(config_file);
     END_SCOPED_TIMED_BLOCK();
+
+    init_shell();
 
     BEGIN_SCOPED_TIMED_BLOCK("begin_eventtap");
     event_tap.mask = (1 << kCGEventKeyDown) | (1 << NX_SYSDEFINED);

@@ -1,4 +1,5 @@
 #include "hotkey.h"
+// #include "log.h"
 
 #define HOTKEY_FOUND           ((1) << 0)
 #define MODE_CAPTURE(a)        ((a) << 1)
@@ -102,6 +103,7 @@ fork_and_exec(char *command)
         setsid();
         char *exec[] = { shell, arg, command, NULL};
         int status_code = execvp(exec[0], exec);
+        // debug("executing shell %s, arg %s, command %s exit code %d\n", shell, arg, command, status_code);
         exit(status_code);
     }
 }
@@ -333,4 +335,8 @@ void init_shell(void)
         char *env_shell = getenv("SHELL");
         shell = env_shell ? env_shell : "/bin/bash";
     }
+}
+
+void set_shell(char *new_shell) {
+    shell = new_shell;
 }
