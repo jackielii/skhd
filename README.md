@@ -5,10 +5,13 @@ This fork adds key forwarding. See [#254](https://github.com/koekeishiya/skhd/pu
 To install:
 
 ```
-brew install jackielii/tap/skhd
+brew install jackielii/tap/my-skhd
 skhd --start-service
 ```
 
+Additional changes:
+
+- added .SHELL to set shell for executing commands. Default is "$SHELL" or "/bin/bash"
 
 **Original Readme**
 ----
