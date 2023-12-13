@@ -175,7 +175,7 @@ static EVENT_TAP_CALLBACK(key_handler)
         if (!current_mode) return event;
 
         struct hotkey eventkey = create_eventkey(event);
-        if (find_and_forward_hotkey(&eventkey, current_mode, event)) {
+        if (find_and_forward_hotkey(&eventkey, current_mode, event, &carbon)) {
             return event;
         }
         BEGIN_TIMED_BLOCK("handle_keypress");

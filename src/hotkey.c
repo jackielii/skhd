@@ -162,10 +162,19 @@ find_process_command_mapping(struct hotkey *hotkey, uint32_t *capture, struct ca
     return result;
 }
 
-bool find_and_forward_hotkey(struct hotkey *k, struct mode *m, CGEventRef event)
+bool find_and_forward_hotkey(struct hotkey *k, struct mode *m, CGEventRef event, struct carbon_event *carbon)
 {
     struct hotkey *found = table_find(&m->hotkey_map, k);
     if (!found || !found->forwarded_hotkey) return false;
+    for (int i = 0; i < buf_len(found->process_name); ++i) {
+        if (same_string(carbon->process_name, found->process_name[i])) {
+            // TODO: only wildcard command is forwarded at the moment
+            return false;
+        }
+        // debug("found hotkey process_name %s\n", found->process_name[i]);
+        // debug("found hotkey command %s\n", found->command[i]);
+    }
+    // debug("found hotkey wildcard_command %s\n", found->wildcard_command);
     debug("forwarding hotkey\n");
     struct hotkey *forwarded = found->forwarded_hotkey;
 

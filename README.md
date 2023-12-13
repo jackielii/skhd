@@ -144,7 +144,8 @@ keycode      = 'apple keyboard kVK_<Key> values (0x3C)'
 proc_map_lst = * <proc_map>
 
 proc_map     = <string> ':' <command> | <string>     '~' |
-               '*'      ':' <command> | '*'          '~'
+               '*'      ':' <command> | '*'          '~' |
+               '*'      '|' <keysym>
 
 string       = '"' 'sequence of characters' '"'
 

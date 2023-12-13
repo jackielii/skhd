@@ -91,6 +91,9 @@ parse_process_command_list(struct parser *parser, struct hotkey *hotkey)
         if (parser_match(parser, Token_Command)) {
             parse_command(parser, hotkey);
             parse_process_command_list(parser, hotkey);
+        } else if (parser_match(parser, Token_Forward)) {
+            // TODO: forward key stroke per application
+            parser_report_error(parser, parser_peek(parser), "forwarding key strokes per application is not yet supported\n");
         } else if (parser_match(parser, Token_Unbound)) {
             buf_push(hotkey->command, NULL);
             parse_process_command_list(parser, hotkey);
@@ -103,6 +106,18 @@ parse_process_command_list(struct parser *parser, struct hotkey *hotkey)
             char *result = copy_string_count(command.text, command.length);
             debug("\tcmd: '%s'\n", result);
             hotkey->wildcard_command = result;
+            parse_process_command_list(parser, hotkey);
+        } else if (parser_match(parser, Token_Forward)) {
+            debug("  forward key stroke: {\n");
+            struct hotkey *forwarded = parse_keypress(parser);
+            if (!forwarded) {
+                parser_report_error(parser, parser_peek(parser), "expect keysym\n");
+                free(forwarded);
+            } else {
+                hotkey->forwarded_hotkey = forwarded;
+                hotkey->wildcard_command = "__key_forward__";
+            }
+            debug("  }\n");
             parse_process_command_list(parser, hotkey);
         } else if (parser_match(parser, Token_Unbound)) {
             hotkey->wildcard_command = NULL;
