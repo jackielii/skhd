@@ -171,12 +171,17 @@ static EVENT_TAP_CALLBACK(key_handler)
         CGEventTapEnable(event_tap->handle, 1);
     } break;
     case kCGEventKeyDown: {
+        // Skip events that we generated ourselves to avoid loops
+        if (CGEventGetIntegerValueField(event, kCGEventSourceUserData) == SKHD_EVENT_MARKER) {
+            return event;
+        }
+
         if (table_find(&blacklst, carbon.process_name)) return event;
         if (!current_mode) return event;
 
         struct hotkey eventkey = create_eventkey(event);
         if (find_and_forward_hotkey(&eventkey, current_mode, event, &carbon)) {
-            return event;
+            return NULL; // Consume the original event since we forwarded it
         }
         BEGIN_TIMED_BLOCK("handle_keypress");
         bool result = find_and_exec_hotkey(&eventkey, &mode_map, &current_mode, &carbon);
@@ -185,6 +190,11 @@ static EVENT_TAP_CALLBACK(key_handler)
         if (result) return NULL;
     } break;
     case NX_SYSDEFINED: {
+        // Skip events that we generated ourselves to avoid loops
+        if (CGEventGetIntegerValueField(event, kCGEventSourceUserData) == SKHD_EVENT_MARKER) {
+            return event;
+        }
+
         if (table_find(&blacklst, carbon.process_name)) return event;
         if (!current_mode) return event;
 

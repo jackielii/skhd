@@ -4,6 +4,7 @@
 #define HOTKEY_FOUND           ((1) << 0)
 #define MODE_CAPTURE(a)        ((a) << 1)
 #define HOTKEY_PASSTHROUGH(a)  ((a) << 2)
+#define SKHD_EVENT_MARKER      0x736B6864  // "skhd" in hex
 
 #define LRMOD_ALT   0
 #define LRMOD_CMD   6
@@ -166,18 +167,43 @@ bool find_and_forward_hotkey(struct hotkey *k, struct mode *m, CGEventRef event,
 {
     struct hotkey *found = table_find(&m->hotkey_map, k);
     if (!found || !found->forwarded_hotkey) return false;
+    
+    // Check if current process has a specific binding
     for (int i = 0; i < buf_len(found->process_name); ++i) {
         if (same_string(carbon->process_name, found->process_name[i])) {
-            // TODO: only wildcard command is forwarded at the moment
-            return false;
+            // Process has a specific binding, don't use wildcard forwarding
+            // Check if the command at this index exists (not forwarding)
+            if (i < buf_len(found->command) && found->command[i]) {
+                // Process has a command binding, not a forward
+                return false;
+            }
         }
-        // debug("found hotkey process_name %s\n", found->process_name[i]);
-        // debug("found hotkey command %s\n", found->command[i]);
     }
-    // debug("found hotkey wildcard_command %s\n", found->wildcard_command);
+    
+    // If we reach here, use wildcard forwarding
     debug("forwarding hotkey\n");
     struct hotkey *forwarded = found->forwarded_hotkey;
 
+    // Create a new event source
+    CGEventSourceRef event_source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+    if (!event_source) return false;
+
+    // Create key down event
+    CGEventRef key_down = CGEventCreateKeyboardEvent(event_source, forwarded->key, true);
+    if (!key_down) {
+        CFRelease(event_source);
+        return false;
+    }
+
+    // Create key up event
+    CGEventRef key_up = CGEventCreateKeyboardEvent(event_source, forwarded->key, false);
+    if (!key_up) {
+        CFRelease(key_down);
+        CFRelease(event_source);
+        return false;
+    }
+
+    // Set modifier flags
     int flags = 0;
     if (has_flags(forwarded, Hotkey_Flag_Alt)) {
         flags |= kCGEventFlagMaskAlternate;
@@ -194,8 +220,24 @@ bool find_and_forward_hotkey(struct hotkey *k, struct mode *m, CGEventRef event,
     if (has_flags(forwarded, Hotkey_Flag_Fn)) {
         flags |= kCGEventFlagMaskSecondaryFn;
     }
-    CGEventSetFlags(event, flags);
-    CGEventSetIntegerValueField(event, kCGKeyboardEventKeycode, forwarded->key);
+
+    // Set flags on both events
+    CGEventSetFlags(key_down, flags);
+    CGEventSetFlags(key_up, flags);
+
+    // Mark these events to avoid processing them again
+    CGEventSetIntegerValueField(key_down, kCGEventSourceUserData, SKHD_EVENT_MARKER);
+    CGEventSetIntegerValueField(key_up, kCGEventSourceUserData, SKHD_EVENT_MARKER);
+
+    // Post both events
+    CGEventPost(kCGSessionEventTap, key_down);
+    CGEventPost(kCGSessionEventTap, key_up);
+
+    // Clean up
+    CFRelease(key_down);
+    CFRelease(key_up);
+    CFRelease(event_source);
+    
     return true;
 }
 
